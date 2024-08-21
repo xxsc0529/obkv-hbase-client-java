@@ -58,7 +58,7 @@ jobs:
       - name: Maven Build
         run: mvn -B clean verify -Dgpg.skip -DskipTests=true
   test-obkv-table-client-java:
-    name: Test (obkv-table-client-java)
+    name: Test (obkv-hbase-client-java)
     needs: build
     runs-on: ubuntu-latest
     steps:
