@@ -29,6 +29,7 @@ import org.apache.hadoop.hbase.client.AbstractClientScanner;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,31 +39,37 @@ import static com.alipay.oceanbase.hbase.util.TableHBaseLoggerFactory.LCD;
 
 public class ClientStreamScanner extends AbstractClientScanner {
 
-    private static final Logger             logger       = TableHBaseLoggerFactory
-                                                             .getLogger(ClientStreamScanner.class);
+    private static final Logger logger =
+            TableHBaseLoggerFactory.getLogger(ClientStreamScanner.class);
 
     private final AbstractQueryStreamResult streamResult;
 
-    private final String                    tableName;
+    private final String tableName;
 
-    private byte[]                          family;
+    private byte[] family;
 
-    private boolean                         closed       = false;
+    private boolean closed = false;
 
-    private boolean                         streamNext   = true;
+    private boolean streamNext = true;
 
-    private boolean                         isTableGroup = false;
+    private boolean isTableGroup = false;
 
-    public ClientStreamScanner(ObTableClientQueryStreamResult streamResult, String tableName,
-                               byte[] family, boolean isTableGroup) {
+    public ClientStreamScanner(
+            ObTableClientQueryStreamResult streamResult,
+            String tableName,
+            byte[] family,
+            boolean isTableGroup) {
         this.streamResult = streamResult;
         this.tableName = tableName;
         this.family = family;
         this.isTableGroup = isTableGroup;
     }
 
-    public ClientStreamScanner(ObTableClientQueryAsyncStreamResult streamResult, String tableName,
-                               byte[] family, boolean isTableGroup) {
+    public ClientStreamScanner(
+            ObTableClientQueryAsyncStreamResult streamResult,
+            String tableName,
+            byte[] family,
+            boolean isTableGroup) {
         this.streamResult = streamResult;
         this.tableName = tableName;
         this.family = family;
@@ -91,8 +98,9 @@ public class ClientStreamScanner extends AbstractClientScanner {
             byte[][] familyAndQualifier = new byte[2][];
             if (this.isTableGroup) {
                 // split family and qualifier
-                familyAndQualifier = OHBaseFuncUtils.extractFamilyFromQualifier((byte[]) startRow
-                    .get(1).getValue());
+                familyAndQualifier =
+                        OHBaseFuncUtils.extractFamilyFromQualifier(
+                                (byte[]) startRow.get(1).getValue());
                 this.family = familyAndQualifier[0];
             } else {
                 familyAndQualifier[1] = (byte[]) startRow.get(1).getValue();
@@ -111,8 +119,9 @@ public class ClientStreamScanner extends AbstractClientScanner {
                 List<ObObj> row = streamResult.getRow();
                 if (this.isTableGroup) {
                     // split family and qualifier
-                    familyAndQualifier = OHBaseFuncUtils.extractFamilyFromQualifier((byte[]) row
-                        .get(1).getValue());
+                    familyAndQualifier =
+                            OHBaseFuncUtils.extractFamilyFromQualifier(
+                                    (byte[]) row.get(1).getValue());
                     this.family = familyAndQualifier[0];
                 } else {
                     familyAndQualifier[1] = (byte[]) row.get(1).getValue();
@@ -122,7 +131,8 @@ public class ClientStreamScanner extends AbstractClientScanner {
                 long t = (Long) row.get(2).getValue();
                 byte[] v = (byte[]) row.get(3).getValue();
                 if (Arrays.equals(sk, k)) {
-                    // when rowKey is equal to the previous rowKey ,merge the result into the same result
+                    // when rowKey is equal to the previous rowKey ,merge the result into the same
+                    // result
                     keyValues.add(new KeyValue(k, family, q, t, v));
                 } else {
                     break;
@@ -131,8 +141,10 @@ public class ClientStreamScanner extends AbstractClientScanner {
             return new Result(keyValues);
         } catch (Exception e) {
             logger.error(LCD.convert("01-00000"), streamResult.getTableName(), e);
-            throw new IOException(String.format("get table %s stream next result error ",
-                streamResult.getTableName()), e);
+            throw new IOException(
+                    String.format(
+                            "get table %s stream next result error ", streamResult.getTableName()),
+                    e);
         }
     }
 
@@ -157,8 +169,12 @@ public class ClientStreamScanner extends AbstractClientScanner {
 
     private void checkStatus() throws IllegalStateException {
         if (closed) {
-            throw new IllegalStateException("table " + tableName + " family "
-                                            + Bytes.toString(family) + " scanner is  closed");
+            throw new IllegalStateException(
+                    "table "
+                            + tableName
+                            + " family "
+                            + Bytes.toString(family)
+                            + " scanner is  closed");
         }
     }
 

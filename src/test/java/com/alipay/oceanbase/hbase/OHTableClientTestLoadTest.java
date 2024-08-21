@@ -18,7 +18,6 @@
 package com.alipay.oceanbase.hbase;
 
 import com.alipay.oceanbase.rpc.exception.ObTableNotExistException;
-import com.alipay.oceanbase.rpc.exception.ObTableUnexpectedException;
 import org.apache.hadoop.hbase.client.Delete;
 import org.junit.After;
 import org.junit.Assert;
@@ -51,7 +50,6 @@ public class OHTableClientTestLoadTest extends HTableTestBase {
             Assert.assertTrue(t instanceof ObTableNotExistException);
             Assert.assertTrue(t.getMessage().contains("test_t$testload"));
         }
-
     }
 
     @After

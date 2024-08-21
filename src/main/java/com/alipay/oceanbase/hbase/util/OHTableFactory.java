@@ -34,27 +34,33 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 /**
  * Factory for creating HTable instances.
- * <p>
- * All created HTable will share the same thread pool.
- * Also support setting table attributes for the created table.
- * e.g. auto flush, write buffer size.
- * <p>
- * Setting the table attributes through the method of {@link OHTablePool}.
- * For example, see {@link OHTablePool#setAutoFlush(String, boolean)}
+ *
+ * <p>All created HTable will share the same thread pool. Also support setting table attributes for
+ * the created table. e.g. auto flush, write buffer size.
+ *
+ * <p>Setting the table attributes through the method of {@link OHTablePool}. For example, see
+ * {@link OHTablePool#setAutoFlush(String, boolean)}
  */
 public class OHTableFactory extends HTableFactory {
     private final ExecutorService threadPool;
-    private final OHTablePool     tablePool;
+    private final OHTablePool tablePool;
 
     public OHTableFactory(Configuration conf, OHTablePool tablePool) {
-        this(conf, tablePool, OHTable
-            .createDefaultThreadPoolExecutor(1, conf.getInt(HBASE_HTABLE_PRIVATE_THREADS_MAX,
-                DEFAULT_HBASE_HTABLE_PRIVATE_THREADS_MAX), conf.getLong(
-                HBASE_HTABLE_THREAD_KEEP_ALIVE_TIME, DEFAULT_HBASE_HTABLE_THREAD_KEEP_ALIVE_TIME)));
+        this(
+                conf,
+                tablePool,
+                OHTable.createDefaultThreadPoolExecutor(
+                        1,
+                        conf.getInt(
+                                HBASE_HTABLE_PRIVATE_THREADS_MAX,
+                                DEFAULT_HBASE_HTABLE_PRIVATE_THREADS_MAX),
+                        conf.getLong(
+                                HBASE_HTABLE_THREAD_KEEP_ALIVE_TIME,
+                                DEFAULT_HBASE_HTABLE_THREAD_KEEP_ALIVE_TIME)));
     }
 
-    public OHTableFactory(Configuration conf, OHTablePool tablePool,
-                          ExecutorService createTableThreadPool) {
+    public OHTableFactory(
+            Configuration conf, OHTablePool tablePool, ExecutorService createTableThreadPool) {
         this.threadPool = createTableThreadPool;
         this.tablePool = tablePool;
     }
@@ -64,21 +70,28 @@ public class OHTableFactory extends HTableFactory {
         try {
             String tableNameStr = Bytes.toString(tableName);
 
-            OHTable ht = new OHTable(adjustConfiguration(copyConfiguration(config), tableNameStr),
-                tableName, this.threadPool);
+            OHTable ht =
+                    new OHTable(
+                            adjustConfiguration(copyConfiguration(config), tableNameStr),
+                            tableName,
+                            this.threadPool);
 
             if (tablePool.getTableAttribute(tableNameStr, HBASE_HTABLE_POOL_AUTO_FLUSH) != null) {
-                ht.setAutoFlush(tablePool.getAutoFlush(tableNameStr),
-                    tablePool.getClearBufferOnFail(tableNameStr));
+                ht.setAutoFlush(
+                        tablePool.getAutoFlush(tableNameStr),
+                        tablePool.getClearBufferOnFail(tableNameStr));
             }
-            if (tablePool.getTableAttribute(tableNameStr, HBASE_HTABLE_POOL_CLEAR_BUFFER_ON_FAIL) != null) {
+            if (tablePool.getTableAttribute(tableNameStr, HBASE_HTABLE_POOL_CLEAR_BUFFER_ON_FAIL)
+                    != null) {
                 ht.setWriteBufferSize(tablePool.getWriteBufferSize(tableNameStr));
             }
-            if (tablePool.getTableAttribute(tableNameStr, HBASE_HTABLE_POOL_OPERATION_TIMEOUT) != null) {
+            if (tablePool.getTableAttribute(tableNameStr, HBASE_HTABLE_POOL_OPERATION_TIMEOUT)
+                    != null) {
                 ht.setOperationTimeout(tablePool.getOperationTimeout(tableNameStr));
             }
 
-            if (tablePool.getTableExtendAttribute(tableNameStr, HBASE_OCEANBASE_BATCH_EXECUTOR) != null) {
+            if (tablePool.getTableExtendAttribute(tableNameStr, HBASE_OCEANBASE_BATCH_EXECUTOR)
+                    != null) {
                 ht.setRuntimeBatchExecutor(tablePool.getRuntimeBatchExecutor(tableNameStr));
             }
             return ht;
@@ -90,7 +103,8 @@ public class OHTableFactory extends HTableFactory {
     private Configuration adjustConfiguration(Configuration configuration, String tableName) {
         byte[] isOdpModeAttr = tablePool.getTableAttribute(tableName, HBASE_OCEANBASE_ODP_MODE);
         if ((isOdpModeAttr != null && Bytes.toBoolean(isOdpModeAttr))
-            || (isOdpModeAttr == null && configuration.getBoolean(HBASE_OCEANBASE_ODP_MODE, false))) {
+                || (isOdpModeAttr == null
+                        && configuration.getBoolean(HBASE_OCEANBASE_ODP_MODE, false))) {
             // set odp mode
             configuration.setBoolean(HBASE_OCEANBASE_ODP_MODE, true);
 
@@ -99,65 +113,75 @@ public class OHTableFactory extends HTableFactory {
             if (!odpAddr.isEmpty()) {
                 configuration.set(HBASE_OCEANBASE_ODP_ADDR, odpAddr);
             }
-            checkArgument(isNotBlank(configuration.get(HBASE_OCEANBASE_ODP_ADDR)),
-                HBASE_OCEANBASE_ODP_ADDR + " is blank");
+            checkArgument(
+                    isNotBlank(configuration.get(HBASE_OCEANBASE_ODP_ADDR)),
+                    HBASE_OCEANBASE_ODP_ADDR + " is blank");
 
             // set odp port
             int odpPort = tablePool.getOdpPort(tableName);
             if (odpPort != -1) {
                 configuration.setInt(HBASE_OCEANBASE_ODP_PORT, odpPort);
             }
-            checkArgument(configuration.getInt(HBASE_OCEANBASE_ODP_PORT, -1) >= 0,
-                HBASE_OCEANBASE_ODP_PORT + " is invalid");
+            checkArgument(
+                    configuration.getInt(HBASE_OCEANBASE_ODP_PORT, -1) >= 0,
+                    HBASE_OCEANBASE_ODP_PORT + " is invalid");
 
             // set database name
             String database = tablePool.getDatabase(tableName);
             if (!database.isEmpty()) {
                 configuration.set(HBASE_OCEANBASE_DATABASE, database);
             }
-            checkArgument(isNotBlank(configuration.get(HBASE_OCEANBASE_DATABASE)),
-                HBASE_OCEANBASE_DATABASE + " is blank");
+            checkArgument(
+                    isNotBlank(configuration.get(HBASE_OCEANBASE_DATABASE)),
+                    HBASE_OCEANBASE_DATABASE + " is blank");
         } else {
             // set ocp mode
             configuration.setBoolean(HBASE_OCEANBASE_ODP_MODE, false);
 
             // set paramUrl
-            String paramUrl = Bytes.toString(tablePool.getTableAttribute(tableName,
-                HBASE_OCEANBASE_PARAM_URL));
+            String paramUrl =
+                    Bytes.toString(
+                            tablePool.getTableAttribute(tableName, HBASE_OCEANBASE_PARAM_URL));
             if (paramUrl != null) {
                 configuration.set(HBASE_OCEANBASE_PARAM_URL, paramUrl);
             }
-            checkArgument(isNotBlank(configuration.get(HBASE_OCEANBASE_PARAM_URL)),
-                "table [" + tableName + "]" + HBASE_OCEANBASE_PARAM_URL + " is blank");
+            checkArgument(
+                    isNotBlank(configuration.get(HBASE_OCEANBASE_PARAM_URL)),
+                    "table [" + tableName + "]" + HBASE_OCEANBASE_PARAM_URL + " is blank");
 
             // set sys user name
-            String sysUserName = Bytes.toString(tablePool.getTableAttribute(tableName,
-                HBASE_OCEANBASE_SYS_USER_NAME));
+            String sysUserName =
+                    Bytes.toString(
+                            tablePool.getTableAttribute(tableName, HBASE_OCEANBASE_SYS_USER_NAME));
             if (sysUserName != null) {
                 configuration.set(HBASE_OCEANBASE_SYS_USER_NAME, sysUserName);
             }
-            checkArgument(isNotBlank(configuration.get(HBASE_OCEANBASE_SYS_USER_NAME)),
-                "table [" + tableName + "]" + HBASE_OCEANBASE_SYS_USER_NAME + " is blank");
+            checkArgument(
+                    isNotBlank(configuration.get(HBASE_OCEANBASE_SYS_USER_NAME)),
+                    "table [" + tableName + "]" + HBASE_OCEANBASE_SYS_USER_NAME + " is blank");
 
             // set sys password
-            String sysPassword = Bytes.toString(tablePool.getTableAttribute(tableName,
-                HBASE_OCEANBASE_SYS_PASSWORD));
+            String sysPassword =
+                    Bytes.toString(
+                            tablePool.getTableAttribute(tableName, HBASE_OCEANBASE_SYS_PASSWORD));
             if (sysPassword != null) {
                 configuration.set(HBASE_OCEANBASE_SYS_PASSWORD, sysPassword);
             }
         }
         // set full user name
-        String fullUsername = Bytes.toString(tablePool.getTableAttribute(tableName,
-            HBASE_OCEANBASE_FULL_USER_NAME));
+        String fullUsername =
+                Bytes.toString(
+                        tablePool.getTableAttribute(tableName, HBASE_OCEANBASE_FULL_USER_NAME));
         if (fullUsername != null) {
             configuration.set(HBASE_OCEANBASE_FULL_USER_NAME, fullUsername);
         }
-        checkArgument(isNotBlank(configuration.get(HBASE_OCEANBASE_FULL_USER_NAME)),
-            "table [" + tableName + "]" + HBASE_OCEANBASE_FULL_USER_NAME + " is blank");
+        checkArgument(
+                isNotBlank(configuration.get(HBASE_OCEANBASE_FULL_USER_NAME)),
+                "table [" + tableName + "]" + HBASE_OCEANBASE_FULL_USER_NAME + " is blank");
 
         // set password
-        String password = Bytes.toString(tablePool.getTableAttribute(tableName,
-            HBASE_OCEANBASE_PASSWORD));
+        String password =
+                Bytes.toString(tablePool.getTableAttribute(tableName, HBASE_OCEANBASE_PASSWORD));
         if (password != null) {
             configuration.set(HBASE_OCEANBASE_PASSWORD, password);
         }
@@ -174,9 +198,7 @@ public class OHTableFactory extends HTableFactory {
         return copy;
     }
 
-    /**
-     * close the factory resources, example create table threadPool
-     */
+    /** close the factory resources, example create table threadPool */
     public void close() {
         if (threadPool != null && !threadPool.isShutdown()) {
             threadPool.shutdown();

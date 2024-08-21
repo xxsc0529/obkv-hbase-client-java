@@ -23,9 +23,8 @@ import org.slf4j.Logger;
 
 public class TableHBaseLoggerFactory {
 
-    public static final String        TABLE_HBASE_LOGGER_SPACE = "oceanbase-table-hbase";
-    public static LogCode2Description LCD                      = LogCode2Description
-                                                                   .create(TABLE_HBASE_LOGGER_SPACE);
+    public static final String TABLE_HBASE_LOGGER_SPACE = "oceanbase-table-hbase";
+    public static LogCode2Description LCD = LogCode2Description.create(TABLE_HBASE_LOGGER_SPACE);
 
     public static Logger getLogger(String name) {
         if (name == null || name.isEmpty()) {
@@ -41,5 +40,4 @@ public class TableHBaseLoggerFactory {
 
         return getLogger(klass.getCanonicalName());
     }
-
 }

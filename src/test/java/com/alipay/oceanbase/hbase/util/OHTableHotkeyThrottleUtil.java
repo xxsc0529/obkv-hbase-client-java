@@ -31,40 +31,53 @@ import static org.junit.Assert.*;
 
 public class OHTableHotkeyThrottleUtil extends Thread {
     public enum TestType {
-        random, specifiedKey
+        random,
+        specifiedKey
     }
 
     public enum OperationType {
-        put, get, scan
+        put,
+        get,
+        scan
     }
 
-    protected HTableInterface   hTable;
-    TestType                    testType;
-    OperationType               operationType;
+    protected HTableInterface hTable;
+    TestType testType;
+    OperationType operationType;
 
-    int                         threadIdx;
-    int                         testNum;
-    long                        startTime           = 0;
-    String                      tableName           = null;
+    int threadIdx;
+    int testNum;
+    long startTime = 0;
+    String tableName = null;
 
-    public int                  threadNum;
-    public static List<Integer> unitOperationTimes  = null;
-    public static List<Integer> unitBlockTimes      = null;
+    public int threadNum;
+    public static List<Integer> unitOperationTimes = null;
+    public static List<Integer> unitBlockTimes = null;
     public static List<Integer> totalOperationTimes = null;
-    public static List<Integer> totalBlockTimes     = null;
+    public static List<Integer> totalBlockTimes = null;
 
-    String                      key;                                   // like key-1001
-    String                      column              = "Column";
-    String                      value               = "value";
-    String                      family              = "familyThrottle";
-    int                         throttleNum         = 0;
-    int                         passNum             = 0;
-    int                         unitBlockTime       = 0;
-    int                         unitOperationTime   = 0;
+    String key; // like key-1001
+    String column = "Column";
+    String value = "value";
+    String family = "familyThrottle";
+    int throttleNum = 0;
+    int passNum = 0;
+    int unitBlockTime = 0;
+    int unitOperationTime = 0;
 
-    public void init(int threadNum, int threadIdx, long startTime, int testNum, TestType testType,
-                     OperationType operationType, String tableName, String family, String key,
-                     String column, String value) throws Exception {
+    public void init(
+            int threadNum,
+            int threadIdx,
+            long startTime,
+            int testNum,
+            TestType testType,
+            OperationType operationType,
+            String tableName,
+            String family,
+            String key,
+            String column,
+            String value)
+            throws Exception {
         this.threadNum = threadNum;
         this.threadIdx = threadIdx;
         this.startTime = startTime;
@@ -77,19 +90,21 @@ public class OHTableHotkeyThrottleUtil extends Thread {
         this.value = value;
 
         switch (testType) {
-            case random: {
-                this.key = null;
-                break;
-            }
-            case specifiedKey: {
-                if (key != null) {
-                    // only the first key count
-                    this.key = key;
-                } else {
-                    throw new IllegalArgumentException("invalid row key pass into init");
+            case random:
+                {
+                    this.key = null;
+                    break;
                 }
-                break;
-            }
+            case specifiedKey:
+                {
+                    if (key != null) {
+                        // only the first key count
+                        this.key = key;
+                    } else {
+                        throw new IllegalArgumentException("invalid row key pass into init");
+                    }
+                    break;
+                }
             default:
                 throw new IllegalArgumentException("invalid test type pass into init");
         }
@@ -134,8 +149,12 @@ public class OHTableHotkeyThrottleUtil extends Thread {
                     runSpecifiedKey();
                     break;
                 default:
-                    System.out.println(Thread.currentThread().getName() + "(idx:" + threadIdx + ")"
-                                       + " has no test type to run");
+                    System.out.println(
+                            Thread.currentThread().getName()
+                                    + "(idx:"
+                                    + threadIdx
+                                    + ")"
+                                    + " has no test type to run");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -143,8 +162,14 @@ public class OHTableHotkeyThrottleUtil extends Thread {
     }
 
     private void runRandom() throws Exception {
-        System.out.println(Thread.currentThread().getName() + "(idx:" + threadIdx + ")"
-                           + " begin to run random " + operationType + " test");
+        System.out.println(
+                Thread.currentThread().getName()
+                        + "(idx:"
+                        + threadIdx
+                        + ")"
+                        + " begin to run random "
+                        + operationType
+                        + " test");
         for (int i = 0; i < testNum; ++i) {
             long randomNum = (long) (Math.random() * 500000);
             String key = "key-" + randomNum;
@@ -165,8 +190,7 @@ public class OHTableHotkeyThrottleUtil extends Thread {
                 unitBlockTimes.set(threadIdx, unitBlockTime);
                 unitOperationTime = 0;
                 unitBlockTime = 0;
-                while (System.currentTimeMillis() - startTime > 2000)
-                    startTime += 2000;
+                while (System.currentTimeMillis() - startTime > 2000) startTime += 2000;
             }
         }
         unitBlockTimes.set(threadIdx, 0);
@@ -176,9 +200,16 @@ public class OHTableHotkeyThrottleUtil extends Thread {
     }
 
     private void runSpecifiedKey() throws Exception {
-        System.out.println(Thread.currentThread().getName() + "(idx:" + threadIdx + ")"
-                           + " begin to run specified key " + this.key + ", type " + operationType
-                           + " test");
+        System.out.println(
+                Thread.currentThread().getName()
+                        + "(idx:"
+                        + threadIdx
+                        + ")"
+                        + " begin to run specified key "
+                        + this.key
+                        + ", type "
+                        + operationType
+                        + " test");
         for (int i = 0; i < testNum; ++i) {
             switch (operationType) {
                 case put:
@@ -190,7 +221,6 @@ public class OHTableHotkeyThrottleUtil extends Thread {
                 case scan:
                     scanTest(this.key);
                     break;
-
             }
             // record operation time for each 2s
             if (System.currentTimeMillis() - startTime > 2000) {
@@ -198,8 +228,7 @@ public class OHTableHotkeyThrottleUtil extends Thread {
                 unitBlockTimes.set(threadIdx, unitBlockTime);
                 unitOperationTime = 0;
                 unitBlockTime = 0;
-                while (System.currentTimeMillis() - startTime > 2000)
-                    startTime += 2000;
+                while (System.currentTimeMillis() - startTime > 2000) startTime += 2000;
             }
         }
         unitBlockTimes.set(threadIdx, 0);

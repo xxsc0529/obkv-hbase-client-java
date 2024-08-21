@@ -65,29 +65,35 @@ public class OHTablePoolTest extends HTableTestBase {
         hTable.close();
     }
 
-    public void test_current_get_close(final OHTablePool ohTablePool, int concurrency, int maxSize) {
+    public void test_current_get_close(
+            final OHTablePool ohTablePool, int concurrency, int maxSize) {
         final CountDownLatch pre = new CountDownLatch(concurrency);
         final CountDownLatch suf = new CountDownLatch(concurrency);
-        final ConcurrentHashSet<HTableInterface> ohTableSet = new ConcurrentHashSet<HTableInterface>();
-        final ConcurrentHashSet<HTableInterface> pooledHTableSet = new ConcurrentHashSet<HTableInterface>();
+        final ConcurrentHashSet<HTableInterface> ohTableSet =
+                new ConcurrentHashSet<HTableInterface>();
+        final ConcurrentHashSet<HTableInterface> pooledHTableSet =
+                new ConcurrentHashSet<HTableInterface>();
         for (int i = 0; i < concurrency; i++) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    pre.countDown();
-                    try {
-                        pre.await();
-                    } catch (InterruptedException e) {
-                        //
-                    }
-                    OHTablePool.PooledOHTable pooledOHTable = ((OHTablePool.PooledOHTable) ohTablePool
-                        .getTable("test"));
-                    HTableInterface htable = pooledOHTable.getTable();
-                    ohTableSet.add(htable);
-                    pooledHTableSet.add(pooledOHTable);
-                    suf.countDown();
-                }
-            }).start();
+            new Thread(
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    pre.countDown();
+                                    try {
+                                        pre.await();
+                                    } catch (InterruptedException e) {
+                                        //
+                                    }
+                                    OHTablePool.PooledOHTable pooledOHTable =
+                                            ((OHTablePool.PooledOHTable)
+                                                    ohTablePool.getTable("test"));
+                                    HTableInterface htable = pooledOHTable.getTable();
+                                    ohTableSet.add(htable);
+                                    pooledHTableSet.add(pooledOHTable);
+                                    suf.countDown();
+                                }
+                            })
+                    .start();
         }
 
         try {
@@ -125,7 +131,7 @@ public class OHTablePoolTest extends HTableTestBase {
         ohTablePool.close();
 
         ohTablePool = newOHTablePool(10, PoolMap.PoolType.ThreadLocal);
-        //ohTablePool.load("test", "oceanbase_stable_test_host");
+        // ohTablePool.load("test", "oceanbase_stable_test_host");
 
         // test first
         test_current_get_close(ohTablePool, 1000, 1);
@@ -134,7 +140,7 @@ public class OHTablePoolTest extends HTableTestBase {
         ohTablePool.close();
 
         ohTablePool = newOHTablePool(10, PoolMap.PoolType.RoundRobin);
-        //ohTablePool.load("test", "oceanbase_stable_test_host");
+        // ohTablePool.load("test", "oceanbase_stable_test_host");
 
         // test first
         test_current_get_close(ohTablePool, 1000, 10);
@@ -142,5 +148,4 @@ public class OHTablePoolTest extends HTableTestBase {
         test_current_get_close(ohTablePool, 1000, 10);
         ohTablePool.close();
     }
-
 }

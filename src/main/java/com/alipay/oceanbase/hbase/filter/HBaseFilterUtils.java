@@ -79,35 +79,60 @@ public class HBaseFilterUtils {
         }
         StringBuilder sb = new StringBuilder();
         if (comparator instanceof BinaryComparator) {
-            sb.append('\'').append(Bytes.toString(ParseConstants.binaryType)).append(':')
-                .append(Bytes.toString(comparator.getValue())).append('\'');
+            sb.append('\'')
+                    .append(Bytes.toString(ParseConstants.binaryType))
+                    .append(':')
+                    .append(Bytes.toString(comparator.getValue()))
+                    .append('\'');
         } else if (comparator instanceof BinaryPrefixComparator) {
-            sb.append('\'').append(Bytes.toString(ParseConstants.binaryPrefixType)).append(':')
-                .append(Bytes.toString(comparator.getValue())).append('\'');
+            sb.append('\'')
+                    .append(Bytes.toString(ParseConstants.binaryPrefixType))
+                    .append(':')
+                    .append(Bytes.toString(comparator.getValue()))
+                    .append('\'');
         } else if (comparator instanceof RegexStringComparator) {
-            sb.append('\'').append(Bytes.toString(ParseConstants.regexStringType)).append(':')
-                .append(Bytes.toString(comparator.getValue())).append('\'');
+            sb.append('\'')
+                    .append(Bytes.toString(ParseConstants.regexStringType))
+                    .append(':')
+                    .append(Bytes.toString(comparator.getValue()))
+                    .append('\'');
         } else if (comparator instanceof SubstringComparator) {
-            sb.append('\'').append(Bytes.toString(ParseConstants.substringType)).append(':')
-                .append(Bytes.toString(comparator.getValue())).append('\'');
+            sb.append('\'')
+                    .append(Bytes.toString(ParseConstants.substringType))
+                    .append(':')
+                    .append(Bytes.toString(comparator.getValue()))
+                    .append('\'');
         } else {
-            throw new IllegalArgumentException("This comparator has not been implemented "
-                                               + comparator);
+            throw new IllegalArgumentException(
+                    "This comparator has not been implemented " + comparator);
         }
         return sb.toString();
     }
 
     private static String toParseableString(CompareFilter filter) {
-        return filter.getClass().getSimpleName() + '(' + toParseableString(filter.getOperator())
-               + ',' + toParseableString(filter.getComparator()) + ')';
+        return filter.getClass().getSimpleName()
+                + '('
+                + toParseableString(filter.getOperator())
+                + ','
+                + toParseableString(filter.getComparator())
+                + ')';
     }
 
     private static String toParseableString(SingleColumnValueFilter filter) {
-        return filter.getClass().getSimpleName() + "('" + Bytes.toString(filter.getFamily())
-               + "','" + Bytes.toString(filter.getQualifier()) + "',"
-               + toParseableString(filter.getOperator()) + ','
-               + toParseableString(filter.getComparator()) + ',' + filter.getFilterIfMissing()
-               + ',' + filter.getLatestVersionOnly() + ')';
+        return filter.getClass().getSimpleName()
+                + "('"
+                + Bytes.toString(filter.getFamily())
+                + "','"
+                + Bytes.toString(filter.getQualifier())
+                + "',"
+                + toParseableString(filter.getOperator())
+                + ','
+                + toParseableString(filter.getComparator())
+                + ','
+                + filter.getFilterIfMissing()
+                + ','
+                + filter.getLatestVersionOnly()
+                + ')';
     }
 
     private static String toParseableString(PageFilter filter) {
@@ -115,8 +140,12 @@ public class HBaseFilterUtils {
     }
 
     private static String toParseableString(ColumnPaginationFilter filter) {
-        return filter.getClass().getSimpleName() + '(' + filter.getLimit() + ','
-               + filter.getOffset() + ')';
+        return filter.getClass().getSimpleName()
+                + '('
+                + filter.getLimit()
+                + ','
+                + filter.getOffset()
+                + ')';
     }
 
     private static String toParseableString(ColumnCountGetFilter filter) {
@@ -128,13 +157,19 @@ public class HBaseFilterUtils {
     }
 
     private static String toParseableString(SkipFilter filter) {
-        return "(" + Bytes.toString(ParseConstants.SKIP_ARRAY) + " "
-               + toParseableString(filter.getFilter()) + ")";
+        return "("
+                + Bytes.toString(ParseConstants.SKIP_ARRAY)
+                + " "
+                + toParseableString(filter.getFilter())
+                + ")";
     }
 
     private static String toParseableString(WhileMatchFilter filter) {
-        return "(" + Bytes.toString(ParseConstants.WHILE_ARRAY) + " "
-               + toParseableString(filter.getFilter()) + ")";
+        return "("
+                + Bytes.toString(ParseConstants.WHILE_ARRAY)
+                + " "
+                + toParseableString(filter.getFilter())
+                + ")";
     }
 
     private static String toParseableString(FilterList filterList) {
@@ -143,8 +178,7 @@ public class HBaseFilterUtils {
         boolean isEmpty = true;
         for (int i = 0; i < filters.size(); i++) {
             String filterString = toParseableString(filters.get(i));
-            if (filterString.isEmpty())
-                continue;
+            if (filterString.isEmpty()) continue;
             if (isEmpty) {
                 sb.append("(").append(filterString);
                 isEmpty = false;
@@ -165,5 +199,4 @@ public class HBaseFilterUtils {
         }
         return sb.toString();
     }
-
 }

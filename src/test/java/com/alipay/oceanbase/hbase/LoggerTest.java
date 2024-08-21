@@ -19,17 +19,12 @@ package com.alipay.oceanbase.hbase;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Append;
-import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Increment;
-import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
-import org.apache.hadoop.hbase.io.TimeRange;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -40,13 +35,10 @@ import java.io.IOException;
 import static org.apache.hadoop.hbase.util.Bytes.toBytes;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(OHTable.class)
-@PowerMockIgnore({ "javax.crypto.*" })
+@PowerMockIgnore({"javax.crypto.*"})
 public class LoggerTest {
     HTableInterface hTableMock;
 
@@ -59,6 +51,7 @@ public class LoggerTest {
 
     /**
      * mock 掉 OHTable 里的 obTableClient，使其链接 ob 失败
+     *
      * @throws Exception
      */
     @Test
@@ -94,8 +87,8 @@ public class LoggerTest {
         }
 
         try {
-            hTableMock.incrementColumnValue("key".getBytes(), "family1".getBytes(),
-                "c1".getBytes(), 1);
+            hTableMock.incrementColumnValue(
+                    "key".getBytes(), "family1".getBytes(), "c1".getBytes(), 1);
             fail();
         } catch (Exception e) {
             assertTrue(true);

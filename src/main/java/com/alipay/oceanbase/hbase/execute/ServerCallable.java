@@ -34,13 +34,14 @@ public abstract class ServerCallable<T> implements Callable<T> {
 
     protected final Configuration conf;
     protected final ObTableClient obTableClient;
-    protected final String        tableNameString;
-    protected int                 callTimeout;
-    protected long                globalStartTime, endTime;
-    protected byte[]              startRow, endRow;
+    protected final String tableNameString;
+    protected int callTimeout;
+    protected long globalStartTime, endTime;
+    protected byte[] startRow, endRow;
 
     /**
      * ServerCallable
+     *
      * @param conf the conf to use
      * @param obTableClient obTableClient to use
      * @param tableNameString Table name to which <code>tableNameString</code> belongs.
@@ -48,8 +49,13 @@ public abstract class ServerCallable<T> implements Callable<T> {
      * @param endRow end row
      * @param callTimeout timeout
      */
-    public ServerCallable(Configuration conf, ObTableClient obTableClient, String tableNameString,
-                          byte[] startRow, byte[] endRow, int callTimeout) {
+    public ServerCallable(
+            Configuration conf,
+            ObTableClient obTableClient,
+            String tableNameString,
+            byte[] startRow,
+            byte[] endRow,
+            int callTimeout) {
         this.conf = conf;
         this.obTableClient = obTableClient;
         this.tableNameString = tableNameString;
@@ -62,9 +68,7 @@ public abstract class ServerCallable<T> implements Callable<T> {
         this.endTime = System.currentTimeMillis();
     }
 
-    public void testConnectWhileIdle() {
-
-    }
+    public void testConnectWhileIdle() {}
 
     public void shouldRetry(Throwable throwable) throws IOException {
         if (throwable instanceof IOException) {
@@ -73,36 +77,42 @@ public abstract class ServerCallable<T> implements Callable<T> {
         }
         if (this.callTimeout != HConstants.DEFAULT_HBASE_CLIENT_OPERATION_TIMEOUT)
             if ((this.endTime - this.globalStartTime > this.callTimeout)) {
-                throw (SocketTimeoutException) new SocketTimeoutException(
-                    "Call to access row '" + Bytes.toString(startRow) + "' to '"
-                            + Bytes.toString(endRow) + "' on table '" + tableNameString
-                            + "' failed on socket timeout exception: " + throwable)
-                    .initCause(throwable);
+                throw (SocketTimeoutException)
+                        new SocketTimeoutException(
+                                        "Call to access row '"
+                                                + Bytes.toString(startRow)
+                                                + "' to '"
+                                                + Bytes.toString(endRow)
+                                                + "' on table '"
+                                                + tableNameString
+                                                + "' failed on socket timeout exception: "
+                                                + throwable)
+                                .initCause(throwable);
             }
     }
 
-    /**
-     * @return {@link com.alipay.oceanbase.rpc.table.ObTable}instance used by this Callable.
-     */
+    /** @return {@link com.alipay.oceanbase.rpc.table.ObTable}instance used by this Callable. */
     ObTableClient getObTableClient() {
         return this.obTableClient;
     }
 
     /**
-     * Run this instance with retries, timed waits,
-     * and refinds of missing regions.
+     * Run this instance with retries, timed waits, and refinds of missing regions.
      *
      * @return an object of type T
-     * @throws IOException      if a remote or network exception occurs
+     * @throws IOException if a remote or network exception occurs
      * @throws RuntimeException other unspecified error
      */
     public T withRetries() throws IOException, RuntimeException {
-        final long pause = conf.getLong(HConstants.HBASE_CLIENT_PAUSE,
-            HConstants.DEFAULT_HBASE_CLIENT_PAUSE);
-        final int numRetries = conf.getInt(HConstants.HBASE_CLIENT_RETRIES_NUMBER,
-            HConstants.DEFAULT_HBASE_CLIENT_RETRIES_NUMBER);
+        final long pause =
+                conf.getLong(HConstants.HBASE_CLIENT_PAUSE, HConstants.DEFAULT_HBASE_CLIENT_PAUSE);
+        final int numRetries =
+                conf.getInt(
+                        HConstants.HBASE_CLIENT_RETRIES_NUMBER,
+                        HConstants.DEFAULT_HBASE_CLIENT_RETRIES_NUMBER);
         globalStartTime = System.currentTimeMillis();
-        List<RetriesExhaustedException.ThrowableWithExtraContext> exceptions = new ArrayList<RetriesExhaustedException.ThrowableWithExtraContext>();
+        List<RetriesExhaustedException.ThrowableWithExtraContext> exceptions =
+                new ArrayList<RetriesExhaustedException.ThrowableWithExtraContext>();
         for (int tries = 0; tries < numRetries; tries++) {
             try {
                 testConnectWhileIdle();
@@ -112,8 +122,9 @@ public abstract class ServerCallable<T> implements Callable<T> {
             } catch (Throwable t) {
                 afterCall();
                 shouldRetry(t);
-                RetriesExhaustedException.ThrowableWithExtraContext qt = new RetriesExhaustedException.ThrowableWithExtraContext(
-                    t, System.currentTimeMillis(), toString());
+                RetriesExhaustedException.ThrowableWithExtraContext qt =
+                        new RetriesExhaustedException.ThrowableWithExtraContext(
+                                t, System.currentTimeMillis(), toString());
                 exceptions.add(qt);
                 if (tries == numRetries - 1) {
                     StringBuilder buffer = new StringBuilder("Failed contacting ");
@@ -147,7 +158,7 @@ public abstract class ServerCallable<T> implements Callable<T> {
      *
      * @param testWhileIdle test while idle
      * @return an object of type T
-     * @throws IOException      if a remote or network exception occurs
+     * @throws IOException if a remote or network exception occurs
      * @throws RuntimeException other unspecified error
      */
     public T withoutRetries(boolean testWhileIdle) throws IOException, RuntimeException {

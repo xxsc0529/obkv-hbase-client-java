@@ -39,13 +39,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class OHTableClient implements HTableInterface, Lifecycle {
-    private byte[]              tableName;
-    private String              tableNameString;
-    private ReentrantLock       lock        = new ReentrantLock();
-    private OHTable             ohTable;
-    private volatile boolean    initialized = false;
+    private byte[] tableName;
+    private String tableNameString;
+    private ReentrantLock lock = new ReentrantLock();
+    private OHTable ohTable;
+    private volatile boolean initialized = false;
     private final Configuration conf;
-    private ExecutorService     runtimeBatchExecutor;
+    private ExecutorService runtimeBatchExecutor;
 
     public void setRuntimeBatchExecutor(ExecutorService runtimeBatchExecutor) {
         this.runtimeBatchExecutor = runtimeBatchExecutor;
@@ -54,7 +54,8 @@ public class OHTableClient implements HTableInterface, Lifecycle {
     /**
      * The constructor.
      *
-     * <p> NOTE: Required parameters in conf:</p>
+     * <p>NOTE: Required parameters in conf:
+     *
      * <pre>
      *      Configuration conf = new Configuration();
      *      conf.set(HBASE_OCEANBASE_PARAM_URL, "http://param_url.com?database=test");
@@ -62,7 +63,7 @@ public class OHTableClient implements HTableInterface, Lifecycle {
      *      conf.set(HBASE_OCEANBASE_PASSWORD, "password");
      *      conf.set(HBASE_OCEANBASE_SYS_USER_NAME, "sys_user_name");
      *      conf.set(HBASE_OCEANBASE_SYS_PASSWORD, "sys_password");
-     *</pre>
+     * </pre>
      *
      * @param tableNameString table name
      * @param conf configure
@@ -75,6 +76,7 @@ public class OHTableClient implements HTableInterface, Lifecycle {
 
     /**
      * Initial the OHTableClient, must be init before use.
+     *
      * @throws Exception if init OHTable failed
      */
     @Override
@@ -115,20 +117,20 @@ public class OHTableClient implements HTableInterface, Lifecycle {
     }
 
     @Override
-    public <T extends Service, R> Map<byte[], R> coprocessorService(Class<T> service,
-                                                                    byte[] startKey, byte[] endKey,
-                                                                    Batch.Call<T, R> callable)
-                                                                                              throws ServiceException,
-                                                                                              Throwable {
+    public <T extends Service, R> Map<byte[], R> coprocessorService(
+            Class<T> service, byte[] startKey, byte[] endKey, Batch.Call<T, R> callable)
+            throws ServiceException, Throwable {
         throw new FeatureNotSupportedException("not supported yet'");
     }
 
     @Override
-    public <T extends Service, R> void coprocessorService(Class<T> service, byte[] startKey,
-                                                          byte[] endKey, Batch.Call<T, R> callable,
-                                                          Batch.Callback<R> callback)
-                                                                                     throws ServiceException,
-                                                                                     Throwable {
+    public <T extends Service, R> void coprocessorService(
+            Class<T> service,
+            byte[] startKey,
+            byte[] endKey,
+            Batch.Call<T, R> callable,
+            Batch.Callback<R> callback)
+            throws ServiceException, Throwable {
         throw new FeatureNotSupportedException("not supported yet'");
     }
 
@@ -168,30 +170,37 @@ public class OHTableClient implements HTableInterface, Lifecycle {
     }
 
     @Override
-    public <R extends Message> Map<byte[], R> batchCoprocessorService(Descriptors.MethodDescriptor methodDescriptor,
-                                                                      Message request,
-                                                                      byte[] startKey,
-                                                                      byte[] endKey,
-                                                                      R responsePrototype)
-                                                                                          throws ServiceException,
-                                                                                          Throwable {
+    public <R extends Message> Map<byte[], R> batchCoprocessorService(
+            Descriptors.MethodDescriptor methodDescriptor,
+            Message request,
+            byte[] startKey,
+            byte[] endKey,
+            R responsePrototype)
+            throws ServiceException, Throwable {
         throw new FeatureNotSupportedException("not supported yet'");
     }
 
     @Override
-    public <R extends Message> void batchCoprocessorService(Descriptors.MethodDescriptor methodDescriptor,
-                                                            Message request, byte[] startKey,
-                                                            byte[] endKey, R responsePrototype,
-                                                            Batch.Callback<R> callback)
-                                                                                       throws ServiceException,
-                                                                                       Throwable {
+    public <R extends Message> void batchCoprocessorService(
+            Descriptors.MethodDescriptor methodDescriptor,
+            Message request,
+            byte[] startKey,
+            byte[] endKey,
+            R responsePrototype,
+            Batch.Callback<R> callback)
+            throws ServiceException, Throwable {
         throw new FeatureNotSupportedException("not supported yet'");
     }
 
     @Override
-    public boolean checkAndMutate(byte[] row, byte[] family, byte[] qualifier,
-                                  CompareFilter.CompareOp compareOp, byte[] value,
-                                  RowMutations mutation) throws IOException {
+    public boolean checkAndMutate(
+            byte[] row,
+            byte[] family,
+            byte[] qualifier,
+            CompareFilter.CompareOp compareOp,
+            byte[] value,
+            RowMutations mutation)
+            throws IOException {
         throw new FeatureNotSupportedException("not supported yet'");
     }
 
@@ -231,8 +240,8 @@ public class OHTableClient implements HTableInterface, Lifecycle {
 
     // Not support.
     @Override
-    public void batch(List<? extends Row> actions, Object[] results) throws IOException,
-                                                                    InterruptedException {
+    public void batch(List<? extends Row> actions, Object[] results)
+            throws IOException, InterruptedException {
         checkStatus();
         ohTable.batch(actions, results);
     }
@@ -245,16 +254,15 @@ public class OHTableClient implements HTableInterface, Lifecycle {
     }
 
     @Override
-    public <R> void batchCallback(List<? extends Row> actions, Object[] results,
-                                  Batch.Callback<R> callback) throws IOException,
-                                                             InterruptedException {
+    public <R> void batchCallback(
+            List<? extends Row> actions, Object[] results, Batch.Callback<R> callback)
+            throws IOException, InterruptedException {
         throw new FeatureNotSupportedException("not supported yet'");
     }
 
     @Override
     public <R> Object[] batchCallback(List<? extends Row> actions, Batch.Callback<R> callback)
-                                                                                              throws IOException,
-                                                                                              InterruptedException {
+            throws IOException, InterruptedException {
         throw new FeatureNotSupportedException("not supported yet'");
     }
 
@@ -309,7 +317,7 @@ public class OHTableClient implements HTableInterface, Lifecycle {
 
     @Override
     public boolean checkAndPut(byte[] row, byte[] family, byte[] qualifier, byte[] value, Put put)
-                                                                                                  throws IOException {
+            throws IOException {
         checkStatus();
         return ohTable.checkAndPut(row, family, qualifier, value, put);
     }
@@ -327,8 +335,9 @@ public class OHTableClient implements HTableInterface, Lifecycle {
     }
 
     @Override
-    public boolean checkAndDelete(byte[] row, byte[] family, byte[] qualifier, byte[] value,
-                                  Delete delete) throws IOException {
+    public boolean checkAndDelete(
+            byte[] row, byte[] family, byte[] qualifier, byte[] value, Delete delete)
+            throws IOException {
         checkStatus();
         return ohTable.checkAndDelete(row, family, qualifier, value, delete);
     }
@@ -354,20 +363,22 @@ public class OHTableClient implements HTableInterface, Lifecycle {
 
     @Override
     public long incrementColumnValue(byte[] row, byte[] family, byte[] qualifier, long amount)
-                                                                                              throws IOException {
+            throws IOException {
         checkStatus();
         return ohTable.incrementColumnValue(row, family, qualifier, amount);
     }
 
     @Override
-    public long incrementColumnValue(byte[] row, byte[] family, byte[] qualifier, long amount,
-                                     Durability durability) throws IOException {
+    public long incrementColumnValue(
+            byte[] row, byte[] family, byte[] qualifier, long amount, Durability durability)
+            throws IOException {
         throw new FeatureNotSupportedException("not supported yet'");
     }
 
     @Override
-    public long incrementColumnValue(byte[] row, byte[] family, byte[] qualifier, long amount,
-                                     boolean writeToWAL) throws IOException {
+    public long incrementColumnValue(
+            byte[] row, byte[] family, byte[] qualifier, long amount, boolean writeToWAL)
+            throws IOException {
         checkStatus();
         return ohTable.incrementColumnValue(row, family, qualifier, amount, writeToWAL);
     }

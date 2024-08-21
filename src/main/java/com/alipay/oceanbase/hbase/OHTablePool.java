@@ -50,21 +50,19 @@ import static org.apache.hadoop.hbase.HConstants.DEFAULT_HBASE_CLIENT_OPERATION_
 public class OHTablePool implements Closeable {
 
     private final PoolMap<String, HTableInterface> tables;
-    private final int                              maxSize;
-    private final PoolMap.PoolType                 poolType;
-    private final Configuration                    config;
-    private final HTableInterfaceFactory           tableFactory;
+    private final int maxSize;
+    private final PoolMap.PoolType poolType;
+    private final Configuration config;
+    private final HTableInterfaceFactory tableFactory;
 
     // A map of table attributes used for the table created by this pool. The map
     // key is composed of Table_Name + SEPARATOR + Attribute_Name, and the value
     // is byte value of attribute.
-    private ConcurrentHashMap<String, byte[]>      tableAttributes;
+    private ConcurrentHashMap<String, byte[]> tableAttributes;
 
-    private ConcurrentHashMap<String, Object>      tableExtendAttributes;
+    private ConcurrentHashMap<String, Object> tableExtendAttributes;
 
-    /**
-     * Default Constructor. Default HBaseConfiguration and no limit on pool size.
-     */
+    /** Default Constructor. Default HBaseConfiguration and no limit on pool size. */
     public OHTablePool() {
         this(new Configuration(), Integer.MAX_VALUE);
     }
@@ -72,7 +70,7 @@ public class OHTablePool implements Closeable {
     /**
      * Constructor to set maximum versions and use the specified configuration.
      *
-     * @param config  configuration
+     * @param config configuration
      * @param maxSize maximum number of references to keep for each table
      */
     public OHTablePool(final Configuration config, final int maxSize) {
@@ -80,53 +78,58 @@ public class OHTablePool implements Closeable {
     }
 
     /**
-     * Constructor to set maximum versions and use the specified configuration and
-     * table factory.
+     * Constructor to set maximum versions and use the specified configuration and table factory.
      *
-     * @param config       configuration
-     * @param maxSize      maximum number of references to keep for each table
+     * @param config configuration
+     * @param maxSize maximum number of references to keep for each table
      * @param tableFactory table factory
      */
-    public OHTablePool(final Configuration config, final int maxSize,
-                       final HTableInterfaceFactory tableFactory) {
+    public OHTablePool(
+            final Configuration config,
+            final int maxSize,
+            final HTableInterfaceFactory tableFactory) {
         this(config, maxSize, tableFactory, PoolMap.PoolType.Reusable);
     }
 
     /**
-     * Constructor to set maximum versions and use the specified configuration and
-     * pool type.
+     * Constructor to set maximum versions and use the specified configuration and pool type.
      *
-     * @param config   configuration
-     * @param maxSize  maximum number of references to keep for each table
-     * @param poolType pool type which is one of {@link PoolMap.PoolType#Reusable} or
-     *                 {@link PoolMap.PoolType#ThreadLocal}
+     * @param config configuration
+     * @param maxSize maximum number of references to keep for each table
+     * @param poolType pool type which is one of {@link PoolMap.PoolType#Reusable} or {@link
+     *     PoolMap.PoolType#ThreadLocal}
      */
-    public OHTablePool(final Configuration config, final int maxSize,
-                       final PoolMap.PoolType poolType) {
+    public OHTablePool(
+            final Configuration config, final int maxSize, final PoolMap.PoolType poolType) {
         this(config, maxSize, null, poolType);
     }
 
     /**
-     * Constructor to set maximum versions and use the specified configuration,
-     * table factory and pool type. The HTablePool supports the
-     * {@link PoolMap.PoolType#Reusable} and {@link PoolMap.PoolType#ThreadLocal}. If the pool
-     * type is null or not one of those two values, then it will default to
-     * {@link PoolMap.PoolType#Reusable}.
+     * Constructor to set maximum versions and use the specified configuration, table factory and
+     * pool type. The HTablePool supports the {@link PoolMap.PoolType#Reusable} and {@link
+     * PoolMap.PoolType#ThreadLocal}. If the pool type is null or not one of those two values, then
+     * it will default to {@link PoolMap.PoolType#Reusable}.
      *
-     * @param config       configuration
-     * @param maxSize      maximum number of references to keep for each table
+     * @param config configuration
+     * @param maxSize maximum number of references to keep for each table
      * @param tableFactory table factory
-     * @param poolType     pool type which is one of {@link PoolMap.PoolType#Reusable} or
-     *                     {@link PoolMap.PoolType#ThreadLocal}
+     * @param poolType pool type which is one of {@link PoolMap.PoolType#Reusable} or {@link
+     *     PoolMap.PoolType#ThreadLocal}
      */
-    public OHTablePool(final Configuration config, final int maxSize,
-                       final HTableInterfaceFactory tableFactory, PoolMap.PoolType poolType) {
+    public OHTablePool(
+            final Configuration config,
+            final int maxSize,
+            final HTableInterfaceFactory tableFactory,
+            PoolMap.PoolType poolType) {
         this(config, maxSize, null, null, poolType);
     }
 
-    public OHTablePool(final Configuration config, final int maxSize,
-        final HTableInterfaceFactory tableFactory,
-        final ExecutorService createTableExecutor, PoolMap.PoolType poolType) {
+    public OHTablePool(
+            final Configuration config,
+            final int maxSize,
+            final HTableInterfaceFactory tableFactory,
+            final ExecutorService createTableExecutor,
+            PoolMap.PoolType poolType) {
         // Make a new configuration instance so I can safely cleanup when
         // done with the pool.
         this.config = config == null ? new Configuration() : config;
@@ -134,8 +137,10 @@ public class OHTablePool implements Closeable {
         // htable
         this.maxSize = maxSize;
         if (tableFactory == null) {
-            this.tableFactory = createTableExecutor == null ? new OHTableFactory(this.config, this)
-                : new OHTableFactory(this.config, this, createTableExecutor);
+            this.tableFactory =
+                    createTableExecutor == null
+                            ? new OHTableFactory(this.config, this)
+                            : new OHTableFactory(this.config, this, createTableExecutor);
         } else {
             this.tableFactory = tableFactory;
         }
@@ -176,9 +181,10 @@ public class OHTablePool implements Closeable {
 
     /**
      * Get a reference to the specified table from the pool.
+     *
      * <p>
-     * <p>
-     * Create a new one if one is not available.
+     *
+     * <p>Create a new one if one is not available.
      *
      * @param tableName table name
      * @return a reference to the specified table
@@ -195,7 +201,7 @@ public class OHTablePool implements Closeable {
     /**
      * Get a reference to the specified table from the pool.
      *
-     * Create a new one if one is not available.
+     * <p>Create a new one if one is not available.
      *
      * @param tableName table name
      * @return a reference to the specified table
@@ -206,8 +212,8 @@ public class OHTablePool implements Closeable {
     }
 
     /**
-     * This method is not needed anymore, clients should call
-     * HTableInterface.close() rather than returning the tables to the pool
+     * This method is not needed anymore, clients should call HTableInterface.close() rather than
+     * returning the tables to the pool
      *
      * @param table the proxy table user got from pool
      * @throws IOException if failed
@@ -233,10 +239,11 @@ public class OHTablePool implements Closeable {
 
     /**
      * Puts the specified HTable back into the pool.
+     *
      * <p>
-     * <p>
-     * If the pool already contains <i>maxSize</i> references to the table, then
-     * the table instance gets closed after flushing buffered edits.
+     *
+     * <p>If the pool already contains <i>maxSize</i> references to the table, then the table
+     * instance gets closed after flushing buffered edits.
      *
      * @param table table
      */
@@ -257,12 +264,11 @@ public class OHTablePool implements Closeable {
     }
 
     /**
-     * Closes all the HTable instances , belonging to the given table, in the
-     * table pool.
+     * Closes all the HTable instances , belonging to the given table, in the table pool.
      *
-     * Note: this is a 'shutdown' of the given table pool and different from
-     * {@link #putTable(HTableInterface)}, that is used to return the table
-     * instance to the pool for future re-use.
+     * <p>Note: this is a 'shutdown' of the given table pool and different from {@link
+     * #putTable(HTableInterface)}, that is used to return the table instance to the pool for future
+     * re-use.
      *
      * @param tableName table name
      * @throws IOException if failed
@@ -288,9 +294,8 @@ public class OHTablePool implements Closeable {
     }
 
     /**
-     * Closes all the HTable instances , belonging to all tables in the table
-     * pool.
-     * Note: this is a 'shutdown' of all the table pools.
+     * Closes all the HTable instances , belonging to all tables in the table pool. Note: this is a
+     * 'shutdown' of all the table pools.
      */
     public void close() throws IOException {
         for (String tableName : tables.keySet()) {
@@ -311,7 +316,7 @@ public class OHTablePool implements Closeable {
      * See {@link OHConstants#HBASE_OCEANBASE_PARAM_URL}
      *
      * @param tableName table name
-     * @param paramUrl  the table root server http url
+     * @param paramUrl the table root server http url
      */
     public void setParamUrl(final String tableName, String paramUrl) {
         setTableAttribute(tableName, HBASE_OCEANBASE_PARAM_URL, Bytes.toBytes(paramUrl));
@@ -351,7 +356,7 @@ public class OHTablePool implements Closeable {
      * See {@link OHConstants#HBASE_OCEANBASE_PASSWORD}
      *
      * @param tableName table name
-     * @param password  the table login password
+     * @param password the table login password
      */
     public void setPassword(final String tableName, final String password) {
         setTableAttribute(tableName, HBASE_OCEANBASE_PASSWORD, Bytes.toBytes(password));
@@ -371,7 +376,7 @@ public class OHTablePool implements Closeable {
      * See {@link OHConstants#HBASE_OCEANBASE_SYS_USER_NAME}
      *
      * @param tableName table name
-     * @param sysUserName  the sys username
+     * @param sysUserName the sys username
      */
     public void setSysUserName(final String tableName, final String sysUserName) {
         setTableAttribute(tableName, HBASE_OCEANBASE_SYS_USER_NAME, Bytes.toBytes(sysUserName));
@@ -391,7 +396,7 @@ public class OHTablePool implements Closeable {
      * See {@link OHConstants#HBASE_OCEANBASE_SYS_PASSWORD}
      *
      * @param tableName table name
-     * @param sysPassword  the sys user password
+     * @param sysPassword the sys user password
      */
     public void setSysPassword(final String tableName, final String sysPassword) {
         setTableAttribute(tableName, HBASE_OCEANBASE_SYS_PASSWORD, Bytes.toBytes(sysPassword));
@@ -419,17 +424,19 @@ public class OHTablePool implements Closeable {
 
     /**
      * Sets the autoFlush flag for the specified tables in this pool.
-     * <p>
-     * See {@link OHTable#setAutoFlush(boolean, boolean)}
      *
-     * @param tableName         table name
-     * @param autoFlush         Whether or not to enable 'auto-flush'.
+     * <p>See {@link OHTable#setAutoFlush(boolean, boolean)}
+     *
+     * @param tableName table name
+     * @param autoFlush Whether or not to enable 'auto-flush'.
      * @param clearBufferOnFail Whether to keep Put failures in the writeBuffer
      */
     public void setAutoFlush(final String tableName, boolean autoFlush, boolean clearBufferOnFail) {
         setTableAttribute(tableName, HBASE_HTABLE_POOL_AUTO_FLUSH, Bytes.toBytes(autoFlush));
-        setTableAttribute(tableName, HBASE_HTABLE_POOL_CLEAR_BUFFER_ON_FAIL,
-            Bytes.toBytes(clearBufferOnFail));
+        setTableAttribute(
+                tableName,
+                HBASE_HTABLE_POOL_CLEAR_BUFFER_ON_FAIL,
+                Bytes.toBytes(clearBufferOnFail));
     }
 
     /**
@@ -456,29 +463,30 @@ public class OHTablePool implements Closeable {
 
     /**
      * Sets the size of the buffer in bytes for the specified tables in this pool.
-     * <p>
-     * See {@link HTable#setWriteBufferSize(long)}
+     *
+     * <p>See {@link HTable#setWriteBufferSize(long)}
      *
      * @param tableName table name
      * @param writeBufferSize The new write buffer size, in bytes.
      * @throws IOException if a remote or network exception occurs.
      */
-    public void setWriteBufferSize(final String tableName, long writeBufferSize) throws IOException {
-        setTableAttribute(tableName, HBASE_HTABLE_POOL_WRITE_BUFFER_SIZE,
-            Bytes.toBytes(writeBufferSize));
+    public void setWriteBufferSize(final String tableName, long writeBufferSize)
+            throws IOException {
+        setTableAttribute(
+                tableName, HBASE_HTABLE_POOL_WRITE_BUFFER_SIZE, Bytes.toBytes(writeBufferSize));
     }
 
     /**
-     * Get the maximum size in bytes of the write buffer for the specified tables
-     * in this pool.
+     * Get the maximum size in bytes of the write buffer for the specified tables in this pool.
      *
      * @param tableName table name
      * @return The size of the write buffer in bytes.
      */
     public long getWriteBufferSize(String tableName) {
         byte[] attr = getTableAttribute(tableName, HBASE_HTABLE_POOL_WRITE_BUFFER_SIZE);
-        return attr == null ? this.config.getLong(HBASE_HTABLE_CLIENT_WRITE_BUFFER, 2097152)
-            : Bytes.toLong(attr);
+        return attr == null
+                ? this.config.getLong(HBASE_HTABLE_CLIENT_WRITE_BUFFER, 2097152)
+                : Bytes.toLong(attr);
     }
 
     /**
@@ -488,14 +496,14 @@ public class OHTablePool implements Closeable {
      * @param operationTimeout timeout
      */
     public void setOperationTimeout(final String tableName, int operationTimeout) {
-        setTableAttribute(tableName, HBASE_HTABLE_POOL_OPERATION_TIMEOUT,
-            Bytes.toBytes(operationTimeout));
+        setTableAttribute(
+                tableName, HBASE_HTABLE_POOL_OPERATION_TIMEOUT, Bytes.toBytes(operationTimeout));
     }
 
     public void refreshTableEntry(final String tableName, final String family, boolean hasTestLoad)
-                                                                                                   throws Exception {
-        ((OHTable) ((PooledOHTable) getTable(tableName)).getTable()).refreshTableEntry(family,
-            hasTestLoad);
+            throws Exception {
+        ((OHTable) ((PooledOHTable) getTable(tableName)).getTable())
+                .refreshTableEntry(family, hasTestLoad);
     }
 
     /**
@@ -550,6 +558,7 @@ public class OHTablePool implements Closeable {
 
     /**
      * Gets the ODP port for the specified tables in this pool.
+     *
      * @param tableName table name
      * @return the ODP port
      */
@@ -560,6 +569,7 @@ public class OHTablePool implements Closeable {
 
     /**
      * Sets the ODP mode for the specified tables in this pool.
+     *
      * @param tableName table name
      * @param odpMode ODP mode
      */
@@ -569,6 +579,7 @@ public class OHTablePool implements Closeable {
 
     /**
      * Gets the ODP mode for the specified tables in this pool.
+     *
      * @param tableName table name
      * @return the ODP mode
      */
@@ -579,6 +590,7 @@ public class OHTablePool implements Closeable {
 
     /**
      * Sets the ODP database name for the specified tables in this pool.
+     *
      * @param tableName table name
      * @param database ODP database name
      */
@@ -588,6 +600,7 @@ public class OHTablePool implements Closeable {
 
     /**
      * Gets the ODP database name for the specified tables in this pool.
+     *
      * @param tableName table name
      * @return the ODP database name
      */
@@ -661,8 +674,8 @@ public class OHTablePool implements Closeable {
     }
 
     /**
-     * A proxy class that implements HTableInterface.close method to return the
-     * wrapped table back to the table pool
+     * A proxy class that implements HTableInterface.close method to return the wrapped table back
+     * to the table pool
      */
     public class PooledOHTable implements HTableInterface {
 
@@ -703,27 +716,27 @@ public class OHTablePool implements Closeable {
         }
 
         @Override
-        public void batch(List<? extends Row> actions, Object[] results) throws IOException,
-                                                                        InterruptedException {
+        public void batch(List<? extends Row> actions, Object[] results)
+                throws IOException, InterruptedException {
             table.batch(actions, results);
         }
 
         @Override
-        public Object[] batch(List<? extends Row> actions) throws IOException, InterruptedException {
+        public Object[] batch(List<? extends Row> actions)
+                throws IOException, InterruptedException {
             return table.batch(actions);
         }
 
         @Override
-        public <R> void batchCallback(List<? extends Row> actions, Object[] results,
-                                      Batch.Callback<R> callback) throws IOException,
-                                                                 InterruptedException {
+        public <R> void batchCallback(
+                List<? extends Row> actions, Object[] results, Batch.Callback<R> callback)
+                throws IOException, InterruptedException {
             throw new FeatureNotSupportedException("not supported yet'");
         }
 
         @Override
         public <R> Object[] batchCallback(List<? extends Row> actions, Batch.Callback<R> callback)
-                                                                                                  throws IOException,
-                                                                                                  InterruptedException {
+                throws IOException, InterruptedException {
             throw new FeatureNotSupportedException("not supported yet'");
         }
 
@@ -769,8 +782,9 @@ public class OHTablePool implements Closeable {
         }
 
         @Override
-        public boolean checkAndPut(byte[] row, byte[] family, byte[] qualifier, byte[] value,
-                                   Put put) throws IOException {
+        public boolean checkAndPut(
+                byte[] row, byte[] family, byte[] qualifier, byte[] value, Put put)
+                throws IOException {
             return table.checkAndPut(row, family, qualifier, value, put);
         }
 
@@ -785,8 +799,9 @@ public class OHTablePool implements Closeable {
         }
 
         @Override
-        public boolean checkAndDelete(byte[] row, byte[] family, byte[] qualifier, byte[] value,
-                                      Delete delete) throws IOException {
+        public boolean checkAndDelete(
+                byte[] row, byte[] family, byte[] qualifier, byte[] value, Delete delete)
+                throws IOException {
             return table.checkAndDelete(row, family, qualifier, value, delete);
         }
 
@@ -797,19 +812,21 @@ public class OHTablePool implements Closeable {
 
         @Override
         public long incrementColumnValue(byte[] row, byte[] family, byte[] qualifier, long amount)
-                                                                                                  throws IOException {
+                throws IOException {
             return table.incrementColumnValue(row, family, qualifier, amount);
         }
 
         @Override
-        public long incrementColumnValue(byte[] row, byte[] family, byte[] qualifier, long amount,
-                                         Durability durability) throws IOException {
+        public long incrementColumnValue(
+                byte[] row, byte[] family, byte[] qualifier, long amount, Durability durability)
+                throws IOException {
             throw new FeatureNotSupportedException("not supported yet'");
         }
 
         @Override
-        public long incrementColumnValue(byte[] row, byte[] family, byte[] qualifier, long amount,
-                                         boolean writeToWAL) throws IOException {
+        public long incrementColumnValue(
+                byte[] row, byte[] family, byte[] qualifier, long amount, boolean writeToWAL)
+                throws IOException {
             return table.incrementColumnValue(row, family, qualifier, amount, writeToWAL);
         }
 
@@ -838,22 +855,20 @@ public class OHTablePool implements Closeable {
         }
 
         @Override
-        public <T extends Service, R> Map<byte[], R> coprocessorService(Class<T> service,
-                                                                        byte[] startKey,
-                                                                        byte[] endKey,
-                                                                        Batch.Call<T, R> callable)
-                                                                                                  throws ServiceException,
-                                                                                                  Throwable {
+        public <T extends Service, R> Map<byte[], R> coprocessorService(
+                Class<T> service, byte[] startKey, byte[] endKey, Batch.Call<T, R> callable)
+                throws ServiceException, Throwable {
             throw new FeatureNotSupportedException("not supported yet'");
         }
 
         @Override
-        public <T extends Service, R> void coprocessorService(Class<T> service, byte[] startKey,
-                                                              byte[] endKey,
-                                                              Batch.Call<T, R> callable,
-                                                              Batch.Callback<R> callback)
-                                                                                         throws ServiceException,
-                                                                                         Throwable {
+        public <T extends Service, R> void coprocessorService(
+                Class<T> service,
+                byte[] startKey,
+                byte[] endKey,
+                Batch.Call<T, R> callable,
+                Batch.Callback<R> callback)
+                throws ServiceException, Throwable {
             throw new FeatureNotSupportedException("not supported yet'");
         }
 
@@ -907,30 +922,37 @@ public class OHTablePool implements Closeable {
         }
 
         @Override
-        public <R extends Message> Map<byte[], R> batchCoprocessorService(Descriptors.MethodDescriptor methodDescriptor,
-                                                                          Message request,
-                                                                          byte[] startKey,
-                                                                          byte[] endKey,
-                                                                          R responsePrototype)
-                                                                                              throws ServiceException,
-                                                                                              Throwable {
+        public <R extends Message> Map<byte[], R> batchCoprocessorService(
+                Descriptors.MethodDescriptor methodDescriptor,
+                Message request,
+                byte[] startKey,
+                byte[] endKey,
+                R responsePrototype)
+                throws ServiceException, Throwable {
             throw new FeatureNotSupportedException("not supported yet'");
         }
 
         @Override
-        public <R extends Message> void batchCoprocessorService(Descriptors.MethodDescriptor methodDescriptor,
-                                                                Message request, byte[] startKey,
-                                                                byte[] endKey, R responsePrototype,
-                                                                Batch.Callback<R> callback)
-                                                                                           throws ServiceException,
-                                                                                           Throwable {
+        public <R extends Message> void batchCoprocessorService(
+                Descriptors.MethodDescriptor methodDescriptor,
+                Message request,
+                byte[] startKey,
+                byte[] endKey,
+                R responsePrototype,
+                Batch.Callback<R> callback)
+                throws ServiceException, Throwable {
             throw new FeatureNotSupportedException("not supported yet'");
         }
 
         @Override
-        public boolean checkAndMutate(byte[] row, byte[] family, byte[] qualifier,
-                                      CompareFilter.CompareOp compareOp, byte[] value,
-                                      RowMutations mutation) throws IOException {
+        public boolean checkAndMutate(
+                byte[] row,
+                byte[] family,
+                byte[] qualifier,
+                CompareFilter.CompareOp compareOp,
+                byte[] value,
+                RowMutations mutation)
+                throws IOException {
             throw new FeatureNotSupportedException("not supported yet'");
         }
 

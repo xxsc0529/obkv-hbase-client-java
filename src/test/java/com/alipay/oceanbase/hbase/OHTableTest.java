@@ -31,7 +31,6 @@ import java.util.concurrent.SynchronousQueue;
 
 import static com.alipay.oceanbase.hbase.util.TableHBaseLoggerFactory.TABLE_HBASE_LOGGER_SPACE;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -66,8 +65,15 @@ public class OHTableTest extends HTableTestBase {
         Configuration c = ObHTableTestUtil.newConfiguration();
         c.set("rs.list.acquire.read.timeout", "10000");
 
-        SofaThreadPoolExecutor executor1 = new SofaThreadPoolExecutor(1, 1, 1000, SECONDS,
-            new SynchronousQueue<Runnable>(), "OHTableDefaultExecutePool", TABLE_HBASE_LOGGER_SPACE);
+        SofaThreadPoolExecutor executor1 =
+                new SofaThreadPoolExecutor(
+                        1,
+                        1,
+                        1000,
+                        SECONDS,
+                        new SynchronousQueue<Runnable>(),
+                        "OHTableDefaultExecutePool",
+                        TABLE_HBASE_LOGGER_SPACE);
         executor1.allowCoreThreadTimeOut(true);
         HTableInterface hTable1 = new OHTable(c, "test".getBytes(), executor1);
 
@@ -86,12 +92,17 @@ public class OHTableTest extends HTableTestBase {
         client.setSysUserName(ObHTableTestUtil.SYS_USER_NAME);
         client.setSysPassword(ObHTableTestUtil.SYS_PASSWORD);
         client.init();
-        SofaThreadPoolExecutor executor2 = new SofaThreadPoolExecutor(1, 1, 1000, SECONDS,
-            new SynchronousQueue<Runnable>(), "OHTableDefaultExecutePool", TABLE_HBASE_LOGGER_SPACE);
+        SofaThreadPoolExecutor executor2 =
+                new SofaThreadPoolExecutor(
+                        1,
+                        1,
+                        1000,
+                        SECONDS,
+                        new SynchronousQueue<Runnable>(),
+                        "OHTableDefaultExecutePool",
+                        TABLE_HBASE_LOGGER_SPACE);
         executor1.allowCoreThreadTimeOut(true);
         new OHTable("test".getBytes(), client, executor2);
         assertTrue(true);
-
     }
-
 }

@@ -21,11 +21,11 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DaemonThreadFactory implements ThreadFactory {
-    private static final AtomicInteger poolNumber   = new AtomicInteger(1);
-    private final AtomicInteger        threadNumber = new AtomicInteger(1);
-    private final ThreadGroup          group;
-    private final String               namePrefix;
-    private final boolean              isDaemon;
+    private static final AtomicInteger poolNumber = new AtomicInteger(1);
+    private final AtomicInteger threadNumber = new AtomicInteger(1);
+    private final ThreadGroup group;
+    private final String namePrefix;
+    private final boolean isDaemon;
 
     public DaemonThreadFactory(String name) {
         this(name, true);
@@ -33,7 +33,8 @@ public class DaemonThreadFactory implements ThreadFactory {
 
     private DaemonThreadFactory(String namePrefix, boolean daemon) {
         SecurityManager s = System.getSecurityManager();
-        this.group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();// NOPMD
+        this.group =
+                (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup(); // NOPMD
         this.namePrefix = namePrefix + "-" + poolNumber.getAndIncrement() + "-thread-";
         this.isDaemon = daemon;
     }

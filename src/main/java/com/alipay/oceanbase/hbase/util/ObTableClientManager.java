@@ -35,28 +35,33 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 public class ObTableClientManager {
 
-    public static final ConcurrentHashMap<ObTableClientKey, ReentrantLock> OB_TABLE_CLIENT_LOCK     = new ConcurrentHashMap<ObTableClientKey, ReentrantLock>();
-    public static final Map<ObTableClientKey, ObTableClient>               OB_TABLE_CLIENT_INSTANCE = new ConcurrentHashMap<ObTableClientKey, ObTableClient>();
+    public static final ConcurrentHashMap<ObTableClientKey, ReentrantLock> OB_TABLE_CLIENT_LOCK =
+            new ConcurrentHashMap<ObTableClientKey, ReentrantLock>();
+    public static final Map<ObTableClientKey, ObTableClient> OB_TABLE_CLIENT_INSTANCE =
+            new ConcurrentHashMap<ObTableClientKey, ObTableClient>();
 
     public static ObTableClient getOrCreateObTableClient(Configuration conf)
-                                                                            throws IllegalArgumentException,
-                                                                            IOException {
+            throws IllegalArgumentException, IOException {
         ObTableClientKey obTableClientKey = null;
         if (conf.getBoolean(HBASE_OCEANBASE_ODP_MODE, false)) {
-            checkArgument(isNotBlank(conf.get(HBASE_OCEANBASE_ODP_ADDR)), HBASE_OCEANBASE_ODP_ADDR
-                                                                          + " is blank");
-            checkArgument(conf.getInt(HBASE_OCEANBASE_ODP_PORT, -1) >= 0, HBASE_OCEANBASE_ODP_PORT
-                                                                          + " is invalid");
-            checkArgument(isNotBlank(conf.get(HBASE_OCEANBASE_DATABASE)), HBASE_OCEANBASE_DATABASE
-                                                                          + " is blank");
+            checkArgument(
+                    isNotBlank(conf.get(HBASE_OCEANBASE_ODP_ADDR)),
+                    HBASE_OCEANBASE_ODP_ADDR + " is blank");
+            checkArgument(
+                    conf.getInt(HBASE_OCEANBASE_ODP_PORT, -1) >= 0,
+                    HBASE_OCEANBASE_ODP_PORT + " is invalid");
+            checkArgument(
+                    isNotBlank(conf.get(HBASE_OCEANBASE_DATABASE)),
+                    HBASE_OCEANBASE_DATABASE + " is blank");
             obTableClientKey = new ObTableClientKey();
             obTableClientKey.setOdpAddr(conf.get(HBASE_OCEANBASE_ODP_ADDR));
             obTableClientKey.setOdpPort(conf.getInt(HBASE_OCEANBASE_ODP_PORT, -1));
             obTableClientKey.setOdpMode(true);
             obTableClientKey.setDatabase(conf.get(HBASE_OCEANBASE_DATABASE));
         } else {
-            checkArgument(isNotBlank(conf.get(HBASE_OCEANBASE_PARAM_URL)),
-                HBASE_OCEANBASE_PARAM_URL + " is blank");
+            checkArgument(
+                    isNotBlank(conf.get(HBASE_OCEANBASE_PARAM_URL)),
+                    HBASE_OCEANBASE_PARAM_URL + " is blank");
             obTableClientKey = new ObTableClientKey();
             obTableClientKey.setParamUrl(conf.get(HBASE_OCEANBASE_PARAM_URL));
             obTableClientKey.setSysUserName(conf.get(HBASE_OCEANBASE_SYS_USER_NAME));
@@ -66,8 +71,9 @@ public class ObTableClientManager {
                 obTableClientKey.setSysPassword(conf.get(HBASE_OCEANBASE_SYS_PASSWORD));
             }
         }
-        checkArgument(isNotBlank(conf.get(HBASE_OCEANBASE_FULL_USER_NAME)),
-            HBASE_OCEANBASE_FULL_USER_NAME + " is blank");
+        checkArgument(
+                isNotBlank(conf.get(HBASE_OCEANBASE_FULL_USER_NAME)),
+                HBASE_OCEANBASE_FULL_USER_NAME + " is blank");
         obTableClientKey.setFullUserName(conf.get(HBASE_OCEANBASE_FULL_USER_NAME));
 
         if (conf.get(HBASE_OCEANBASE_PASSWORD) == null) {
@@ -87,7 +93,7 @@ public class ObTableClientManager {
     }
 
     public static ObTableClient getOrCreateObTableClient(ObTableClientKey obTableClientKey)
-                                                                                           throws IOException {
+            throws IOException {
         if (OB_TABLE_CLIENT_INSTANCE.get(obTableClientKey) == null) {
             ReentrantLock tmp = new ReentrantLock();
             ReentrantLock lock = OB_TABLE_CLIENT_LOCK.putIfAbsent(obTableClientKey, tmp);
@@ -125,15 +131,15 @@ public class ObTableClientManager {
     }
 
     public static class ObTableClientKey {
-        private String     paramUrl;
-        private String     fullUserName;
-        private String     password;
-        private String     sysUserName;
-        private String     sysPassword;
-        private String     odpAddr;
-        private int        odpPort;
-        private String     database;
-        private boolean    odpMode    = false;
+        private String paramUrl;
+        private String fullUserName;
+        private String password;
+        private String sysUserName;
+        private String sysPassword;
+        private String odpAddr;
+        private int odpPort;
+        private String database;
+        private boolean odpMode = false;
         private Properties properties = new Properties();
 
         public String getParamUrl() {
@@ -218,24 +224,25 @@ public class ObTableClientManager {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o)
-                return true;
-            if (o == null || getClass() != o.getClass())
-                return false;
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
             ObTableClientKey that = (ObTableClientKey) o;
             boolean ans = false;
             if (odpMode) {
-                ans = Objects.equal(fullUserName, that.fullUserName)
-                      && Objects.equal(password, that.password)
-                      && Objects.equal(odpAddr, that.odpAddr) && odpPort == that.odpPort
-                      && Objects.equal(database, that.database);
+                ans =
+                        Objects.equal(fullUserName, that.fullUserName)
+                                && Objects.equal(password, that.password)
+                                && Objects.equal(odpAddr, that.odpAddr)
+                                && odpPort == that.odpPort
+                                && Objects.equal(database, that.database);
 
             } else {
-                ans = Objects.equal(paramUrl, that.paramUrl)
-                      && Objects.equal(fullUserName, that.fullUserName)
-                      && Objects.equal(password, that.password)
-                      && Objects.equal(sysUserName, that.sysUserName)
-                      && Objects.equal(sysPassword, that.sysPassword);
+                ans =
+                        Objects.equal(paramUrl, that.paramUrl)
+                                && Objects.equal(fullUserName, that.fullUserName)
+                                && Objects.equal(password, that.password)
+                                && Objects.equal(sysUserName, that.sysUserName)
+                                && Objects.equal(sysPassword, that.sysPassword);
             }
             return ans;
         }

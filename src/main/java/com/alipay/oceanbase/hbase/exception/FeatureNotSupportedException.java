@@ -19,8 +19,7 @@ package com.alipay.oceanbase.hbase.exception;
 
 public class FeatureNotSupportedException extends RuntimeException {
 
-    public FeatureNotSupportedException() {
-    }
+    public FeatureNotSupportedException() {}
 
     public FeatureNotSupportedException(String message) {
         super(message);

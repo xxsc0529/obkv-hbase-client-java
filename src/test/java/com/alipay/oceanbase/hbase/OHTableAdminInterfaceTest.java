@@ -99,8 +99,8 @@ public class OHTableAdminInterfaceTest {
     public void testGetStartEndKeysOHTablePoolRange() throws Exception {
         // Init PooledOHTable
         OHTablePool ohTablePool = setUpPool();
-        OHTablePool.PooledOHTable hTable = (OHTablePool.PooledOHTable) ohTablePool
-            .getTable("testAdminRange");
+        OHTablePool.PooledOHTable hTable =
+                (OHTablePool.PooledOHTable) ohTablePool.getTable("testAdminRange");
 
         Pair<byte[][], byte[][]> startEndKeys = hTable.getStartEndKeys();
 
@@ -118,8 +118,8 @@ public class OHTableAdminInterfaceTest {
     public void testGetStartEndKeysOHTablePoolKey() throws Exception {
         // Init PooledOHTable
         OHTablePool ohTablePool = setUpPool();
-        OHTablePool.PooledOHTable hTable = (OHTablePool.PooledOHTable) ohTablePool
-            .getTable("testAdminKey");
+        OHTablePool.PooledOHTable hTable =
+                (OHTablePool.PooledOHTable) ohTablePool.getTable("testAdminKey");
 
         Pair<byte[][], byte[][]> startEndKeys = hTable.getStartEndKeys();
 
@@ -200,8 +200,8 @@ public class OHTableAdminInterfaceTest {
     public void testGetStartEndKeysOHTablePoolLoadRange() throws Exception {
         // Init PooledOHTable
         OHTablePool ohTablePool = setUpLoadPool();
-        OHTablePool.PooledOHTable hTable = (OHTablePool.PooledOHTable) ohTablePool
-            .getTable("testAdminRange");
+        OHTablePool.PooledOHTable hTable =
+                (OHTablePool.PooledOHTable) ohTablePool.getTable("testAdminRange");
         hTable.getConfiguration().set(HBASE_HTABLE_TEST_LOAD_ENABLE, "true");
 
         Pair<byte[][], byte[][]> startEndKeys = hTable.getStartEndKeys();
@@ -220,8 +220,8 @@ public class OHTableAdminInterfaceTest {
     public void testGetStartEndKeysOHTablePoolLoadKey() throws Exception {
         // Init PooledOHTable
         OHTablePool ohTablePool = setUpLoadPool();
-        OHTablePool.PooledOHTable hTable = (OHTablePool.PooledOHTable) ohTablePool
-            .getTable("testAdminKey");
+        OHTablePool.PooledOHTable hTable =
+                (OHTablePool.PooledOHTable) ohTablePool.getTable("testAdminKey");
         hTable.getConfiguration().set(HBASE_HTABLE_TEST_LOAD_ENABLE, "true");
 
         Pair<byte[][], byte[][]> startEndKeys = hTable.getStartEndKeys();
